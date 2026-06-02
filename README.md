@@ -1,39 +1,57 @@
-# Turkey Radio App (No In-App Ads)
+# Samsung Galaxy eSIM Service Helper APK
 
-This app is an ad-free desktop player UI for Turkish internet radio streams.
+This repository now contains a combined Android APK project for Samsung Galaxy Settings workflows plus the earlier desktop helper source. The APK is designed for people who want one app on a Samsung Galaxy device that opens eSIM, SIM manager, mobile network, data usage, Wi‑Fi, VPN, hotspot/tethering, and app settings pages when the firmware exposes them.
 
-## Important technical/legal note
+## Important hardware limitation
 
-A normal desktop app like this **cannot directly scan/control real RF radio towers** or safely intercept nearby Bluetooth/Wi-Fi/radio signals as a station source.
+A **Samsung Galaxy Tab S9 FE+ Wi‑Fi** tablet cannot be turned into a cellular/eSIM tablet by installing an APK. Real eSIM and mobile data require cellular hardware, including a modem, antennas, carrier firmware, an IMEI, and eUICC/SIM support. This service APK can combine settings shortcuts and diagnostics in one launcher app, but Android and Samsung firmware cannot create missing cellular hardware in software.
 
-So this app uses a legal/public internet radio directory (Radio Browser) and loads Turkish stations from the internet.
+## Android APK features
 
-## Features
+- One Samsung-focused launcher app named **Galaxy eSIM Service**.
+- Buttons for Samsung/Android network, mobile network, data usage, SIM/eSIM, Wi‑Fi, VPN, hotspot/tethering, and app settings screens.
+- A lightweight Android service component so the project is packaged as a service-style APK while keeping all user actions safe and visible.
+- Device diagnostics showing telephony, cellular radio, eUICC/eSIM availability, carrier/operator, manufacturer, and model.
+- Fallback behavior that opens general Settings or explains when a cellular page is hidden on Wi‑Fi-only firmware.
 
-- No in-app ad banners/popups added by this app
-- Loads large Turkish station list (`countrycode=TR`)
-- Search by station/city text
-- City filter (includes Istanbul, Mersin, Adana, Gaziantep, Alanya, Antalya, Canakkale, Balikesir when available)
-- Play Selected / Stop / Replay
+## Build the APK
 
-## Run in Visual Studio Code
-
-```bash
-pip install -r requirements.txt
-python src/turkey_radio_app.py
-```
-
-## Build EXE for Windows
+The Android project lives in `app/` and can be built with Gradle when the Android Gradle Plugin and Android SDK are available:
 
 ```bash
-pip install pyinstaller
-pyinstaller --noconfirm --onefile --windowed --name TurkeyRadio src/turkey_radio_app.py
+./scripts/build_debug_apk.sh
 ```
 
-Output:
-- `dist/TurkeyRadio.exe`
+The debug APK output path is:
 
-## Notes
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
 
-- This app itself does not inject ads; however, some streams may include broadcaster-side audio ads.
-- VLC must be installed on Windows for `python-vlc` playback.
+Install it on a connected Android/Samsung device with:
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Desktop helper
+
+The earlier desktop helper is still available for technicians who want to launch Settings pages over ADB from a computer:
+
+```bash
+python src/samsung_esim_settings_app.py
+```
+
+No third-party Python package is required for the desktop UI. To launch settings on a connected Android/Samsung device, install Android Platform Tools so `adb` is available on your PATH.
+
+## ADB examples
+
+```bash
+adb devices -l
+adb shell am start -a android.settings.WIRELESS_SETTINGS
+adb shell am start -a android.settings.DATA_USAGE_SETTINGS
+adb shell am start -a android.settings.WIFI_SETTINGS
+adb shell am start -a android.settings.VPN_SETTINGS
+```
+
+If a Settings action fails or opens a generic page, that Samsung firmware or device model does not expose the requested screen. On Wi‑Fi-only Galaxy tablets, SIM manager, eSIM activation, APN, roaming, and mobile data controls may be hidden because the cellular radio stack is not present.
